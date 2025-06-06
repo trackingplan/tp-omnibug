@@ -22,6 +22,7 @@ test("GoogleAnalytics4Provider pattern should match various UA domains", t => {
             "https://analytics.google.com/g/collect?v=2&tid=G-1234567",
             "https://foo.appspot.com/g/collect/",
             "https://foo.appspot.com/g/collect?v=2&tid=G-1234567",
+            "https://gtm-server-prod-amrl3v6bma-ew.a.run.app/g/collect?v=2&tid=G-G13VWM48QC",
         ],
         negativeUrls = [
             "https://omnibug.io/testing",

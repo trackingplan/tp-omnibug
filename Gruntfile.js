@@ -6,11 +6,11 @@ module.exports = function (grunt) {
     grunt.config.init({
         "extension": {
             "production": {
-                "name": "Omnibug",
-                "version": "2.1.0",
-                "storageKey": "omnibug",
-                "feedbackUrl": "https://github.com/MisterPhilip/omnibug/issues",
-                "analyticsID": "UA-114343677-2"
+                "name": "Trackingplan Omnibug",
+                "version": "1.0.0",
+                "storageKey": "trackingplan-omnibug",
+                "feedbackUrl": "https://github.com/trackingplan/tp-omnibug/issues",
+                "analyticsID": "-"
             }
         },
         "chrome": {

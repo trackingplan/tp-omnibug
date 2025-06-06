@@ -2,7 +2,7 @@
   "action": {
     "default_popup": "popup/popup.html"
   },
-  "author": "Philip Lawrence",
+  "author": "Philip Lawrence / Trackingplan",
   "background": {
     "scripts": [
       "serviceWorker-full.js"
@@ -28,15 +28,16 @@
   },
   "manifest_version": 3,
   "minimum_chrome_version": "102",
-  "name": "Omnibug",
+  "name": "Trackingplan Omnibug",
   "options_ui": {
     "page": "options/options.html"
   },
   "permissions": [
     "storage",
     "webNavigation",
-    "webRequest"
+    "webRequest",
+    "scripting"
   ],
-  "short_name": "Omnibug",
-  "version": "2.0.0"
+  "short_name": "Trackingplan Omnibug",
+  "version": "1.0.0"
 }

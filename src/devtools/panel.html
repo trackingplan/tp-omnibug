@@ -2,11 +2,33 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
+    <link href="../assets/css/font.css" rel="stylesheet" />
     <link rel="stylesheet" type="text/css" href="./panel.css" />
     <style type="text/css" id="settingsStyles"></style>
     <style type="text/css" id="filterStyles"></style>
     <style type="text/css" id="cellWidthStyles">
         .request-details tbody > tr > td:first-of-type { width: 14rem; }
+    </style>
+    <style type="text/css" id="trackingplan">
+        .tp-badge {
+            padding: 0 8px;
+            width: 45px;
+            line-height: 20px;
+            border-radius: 20px;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 500;
+            text-align: center;
+        }
+        .tp-badge-warning {
+            background-color: #ffc636;
+        }
+        .tp-badge-ok {
+            background-color: #03d8a0;
+        }
+        .tp-badge-info {
+            color: #ccc;
+        }
     </style>
 </head>
 <body>
@@ -16,6 +38,9 @@
                  <a href="#clear" class="btn btn-link tooltip tooltip-right" aria-label="Clear Requests" data-tooltip="Clear Requests"><i class="fas fa-trash"></i></a>
             </section>
             <section class="navbar-section">
+                <a href="#trackingplan-id" class="btn btn-link tooltip tooltip-left" id="trackingplan-id-btn" data-tooltip="Click to change Trackingplan ID" aria-label="Current Trackingplan ID. Click to edit.">
+                    <span id="trackingplan-id-display">Click to connect to Trackingplan</span>
+                </a>
                 <a href="#enable-persist" class="btn btn-link tooltip tooltip-left" id="persist-enable" data-tooltip="Click to persist requests across pages." aria-label="Requests will be cleared between page loads. Click to persist them instead."><i class="fas fa-history"></i></a>
                 <a href="#disable-persist" class="btn btn-link tooltip tooltip-left" id="persist-disable" data-tooltip="Click to clear requests between pages." aria-label="Requests are persisted across pages. Click to clear them between pages instead."><i class="fas fa-history"></i></a>
                 <a href="#filter-modal" class="btn btn-link tooltip tooltip-left" aria-label="Filter Requests" data-target-modal="filter-modal" data-tooltip="Filter Requests"><i class="fas fa-filter"></i></a>
@@ -42,7 +67,7 @@
         </section>
         <footer>
             <p>&copy; ##YEAR## <a href="https://misterphilip.com/?utm_source=omnibug&utm_medium=##BROWSER##&utm_campaign=footer" target="_blank">Philip Lawrence</a>
-                &amp; <a href="https://github.com/MisterPhilip/omnibug/graphs/contributors" target="_blank">Contributors</a>
+                &amp; <a href="https://github.com/MisterPhilip/omnibug/graphs/contributors" target="_blank">Contributors</a> & <a href="https://github.com/MisterPhilip/omnibug/graphs/contributors" target="_blank">Trackingplan</a>
                 &mdash; <a href="https://omnibug.io/help/changelog?utm_source=extension&utm_medium=##BROWSER##&utm_campaign=devtools-footer" target="_blank">v##OMNIBUG_VERSION##</a></p>
         </footer>
     </main>
@@ -183,6 +208,7 @@
     <script src="../providers.js"></script>
     <script src="../libs/OmnibugSettings.js"></script>
     <script src="../libs/OmnibugTracker.js"></script>
+    <script src="../libs/trackingplan.js"></script>
     <script src="../libs/helpers.js"></script>
     <script src="../assets/js/fuse.js"></script>
     <script src="./panel.js"></script>
