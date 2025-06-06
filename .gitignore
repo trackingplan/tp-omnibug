@@ -10,9 +10,6 @@ Desktop.ini
 # CI
 node_modules/
 
-# Build output
-build/
-
 # Grunt work
 .grunt/
 
