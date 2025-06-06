@@ -16,7 +16,7 @@ Since this is a preview version, you'll need to install it manually. Here are th
 
 ### Download Links
 - **Chrome**: [Download Chrome Extension (.zip)](https://raw.githubusercontent.com/trackingplan/tp-omnibug/master/build/chrome_production-1.0.0.zip)
-- **Edge**: [Download Edge Extension (.zip)](https://raw.githubusercontent.com/trackingplan/tp-omnibug/main/build/edge_production-1.0.0.zip)
+- **Edge**: [Download Edge Extension (.zip)](https://raw.githubusercontent.com/trackingplan/tp-omnibug/master/build/edge_production-1.0.0.zip)
 - **Firefox**: [Download Firefox Extension (.zip)](https://raw.githubusercontent.com/trackingplan/tp-omnibug/master/build/edge_production-1.0.0.zip)
 
 ### Installation Instructions
