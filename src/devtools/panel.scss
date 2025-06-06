@@ -3,9 +3,11 @@
 @import "../../node_modules/@fortawesome/fontawesome-free/scss/solid.scss";
 @import "../assets/styles/icons";
 
-html, body {
+html,
+body {
   height: 100%;
 }
+
 body {
   font-size: $font-size;
   margin: 0 auto;
@@ -15,43 +17,56 @@ body {
   display: flex;
   flex-direction: column;
 }
-body > header, nav.navbar {
+
+body>header {
+  box-shadow: $soft-elevation;
+  margin-bottom: 1px;
+}
+
+body>header,
+nav.navbar {
   width: 100%;
   height: 37px;
 }
-body > main {
+
+body>main {
   overflow-y: auto;
   overflow-x: hidden;
   flex: 1;
   display: flex;
   flex-direction: column;
 }
-body > main > section {
+
+body>main>section {
   flex: 1;
 }
-body > main > footer {
+
+body>main>footer {
   width: 100%;
   text-align: center;
   color: #999;
 }
-body > main > footer p {
+
+body>main>footer p {
   margin: 0;
   padding: .4em 0;
 }
-body > main > footer a {
+
+body>main>footer a {
   color: lighten($primary-color, 15%);
 }
-details > summary {
+
+details>summary {
   -moz-user-select: none;
   user-select: none;
   cursor: pointer;
 }
+
 nav.navbar {
   background: $white;
-  border-bottom: 1px solid $border-color;
 
   .navbar-section:last-of-type a.btn {
-    border-left: 1px solid #eee;
+    border-left: 1px solid #ededed;
   }
 
   .btn.btn-link {
@@ -61,33 +76,54 @@ nav.navbar {
   .btn.btn-link:hover {
     color: $primary-color-dark;
   }
+
+  margin-bottom: 10px;
 }
+
 #no-requests {
   animation: fadein 2s;
   background-color: transparent;
 }
+
 .request {
   width: 100%;
-  padding: 0 5px;
+  padding: 0 0px;
+  border-top: 1px solid #EDEDED;
 
-  > summary {
+  &:last-of-type {
+    border-bottom: 1px solid #EDEDED;
+  }
+
+  &:first-of-type {
+    border-top: none;
+  }
+
+  >summary {
     padding: 5px;
     position: sticky;
     top: 0;
     z-index: 100;
 
     .container {
-      height: 21px;
+      height: auto;
       margin-top: -1.5em;
       margin-left: .75em;
     }
 
     .column {
       @include hide-overflow;
+      display: flex;
+      align-items: center;
+      min-height: 30px;
+
+    }
+
+    .column.validation {
+      overflow: visible !important;
     }
   }
 
-  > div {
+  >div {
     font-size: .9em;
     padding: 1em;
   }
@@ -96,103 +132,87 @@ nav.navbar {
   table th {
     padding: .2rem .1rem;
     word-break: break-all;
+    background-color: $body-background-color;
   }
 
   .redirected:hover .redirect-icon,
   .redirected:focus .redirect-icon {
     color: red;
   }
-  &:nth-of-type(odd) {
-    background-color: $body-background-color;
-    &.request-error > summary {
+
+  &.request-error {
+    >summary {
+      color: $dark-warning-color-background;
       background-color: $warning-color-background;
     }
-  }
-  &:nth-of-type(even) {
-    background-color: darken($body-background-color, 5%);
-    &.request-error > summary {
-      background-color: darken($warning-color-background, 5%);
-    }
-  }
-  &.request-error {
-    > summary {
-      color: $dark-warning-color-background;
-    }
+
     .request-note {
       margin-top: 0.4rem;
     }
   }
-
 }
-@keyframes request-highlight-odd {
+
+/* When requests are in reverse order */
+#requests.reversed .request {
+  &:first-of-type {
+    border-bottom: 1px solid #EDEDED !important;
+    border-top: none !important;
+  }
+
+  &:last-of-type {
+    border-bottom: none !important;
+    border-top: none !important;
+  }
+}
+
+@keyframes request-highlight {
   0% {
     background: lighten($primary-color-light, 7%);
   }
+
   100% {
     background: $body-background-color;
   }
 }
-@keyframes dark-request-highlight-odd {
-  0% {
-    background: #555;
-  }
-  100% {
-    background: $dark-body-background-color;
-  }
+
+.request:not([open]) {
+  animation: request-highlight 1.2s;
 }
-@keyframes request-highlight-even {
-  0% {
-    background: lighten($primary-color-light, 3%);
-  }
-  100% {
-    background: darken($body-background-color, 5%);
-  }
-}
-@keyframes dark-request-highlight-even {
-  0% {
-    background: #555;
-  }
-  100% {
-    background: darken($dark-body-background-color, 5%);
-  }
-}
-.request:nth-of-type(odd):not([open]) {
-  animation: request-highlight-odd 1.2s;
-}
-.request:nth-of-type(even):not([open]) {
-  animation: request-highlight-even 1.2s;
-}
-.request[open],
-.request[open] > summary {
-  border-bottom: 1px solid #dedede;
-}
-.request[open] > summary {
+
+.request[open]>summary {
   background-color: $primary-color-light;
 }
+
 .request:not(.redirected) .redirect {
   display: none;
 }
+
 .request:not(.multipled) .multiple {
   display: none;
 }
+
 .request.redirected {
   .redirect-icon {
     margin-left: .5em;
     color: $gray-color;
   }
+
   .request-note {
     margin-top: 0.4rem;
   }
 }
+
 .request.redirected:hover {
   .redirect-icon {
     color: $warning-color;
   }
 }
+
 .request.request-error {
   .request-error-icon {
     margin-left: 0.25rem;
   }
+
   .request-error-message {
     padding: 0.15rem 0.25rem;
     border: 0;
@@ -200,22 +220,26 @@ nav.navbar {
     color: white;
   }
 }
+
 .request.multipled {
   .multiple-icon {
     margin-left: .5em;
     color: $gray-color;
   }
+
   .request-note {
     margin-top: 0.4rem;
   }
 }
+
 .request.redirected:hover {
   .redirect-icon {
     color: $warning-color;
   }
 }
+
 .request-details {
-  > summary {
+  >summary {
     font-weight: 600;
     font-size: 1.1em;
     padding: .3em .3em .3em .5em;
@@ -226,53 +250,68 @@ nav.navbar {
     border-bottom: 0;
     z-index: 2;
   }
+
   table {
     border: 1px solid $border-color;
     border-bottom: 0;
     border-collapse: initial;
     table-layout: fixed;
   }
-  tbody > tr > td:first-of-type {
+
+  tbody>tr>td:first-of-type {
     width: 14em;
     font-weight: 600;
     padding-left: .3em;
+
     &::after {
-        content: " ";
-        width: 5px;
-        height: 100%;
-        position: absolute;
-        top: 0;
-        right: 0;
-        cursor: w-resize;
-        border-right: 1px solid rgba(0, 0, 0, 0.1);
+      content: " ";
+      width: 5px;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      right: 0;
+      cursor: w-resize;
+      border-right: 1px solid rgba(0, 0, 0, 0.1);
     }
   }
+
   .parameter-value {
-      padding-left: 5px;
-      padding-right: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+    font-family: 'Courier New', Courier, monospace
   }
 }
+
 .request-details:last-of-type {
-  > summary {
+  >summary {
     border-bottom: 1px solid #ddd;
   }
 }
+
 .request-details[open] {
-  > summary { 
+  >summary {
     border-bottom: 0;
   }
 }
+
 .request summary .label {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   float: left;
-  font-size: .8em;
-  margin-right: .5em;
-  padding: .35em;
-  width: 80px;
+  font-size: 1em;
+  margin-right: 0.5em;
+  padding-left: 0.35em;
+  padding-right: 0.35em;
+  width: 150px;
   text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: pre-line;
+  height: 100%;
 }
+
 .request-note {
   input {
     height: 1.4rem;
@@ -280,17 +319,22 @@ nav.navbar {
     background: none;
     border: 0;
   }
-  input:hover, .request-note input:focus {
+
+  input:hover,
+  .request-note input:focus {
     background: $white;
     transition: background 0.5s linear;
   }
 }
-.parameter-key, .parameter-field {
+
+.parameter-key,
+.parameter-field {
   display: block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 #requests .navigation {
   @include hide-overflow;
   width: 100%;
@@ -300,84 +344,119 @@ nav.navbar {
   color: #AAA;
   border-top: 1px solid $border-color;
 }
+
 #requests .navigation:hover {
   color: #555;
 }
+
 #requests .navigation:first-of-type {
   border-top: 0;
 }
+
 .modal.modal-lg .modal-container {
   max-height: none;
 }
+
 .modal-header {
   padding-bottom: 0;
 }
+
 .modal-footer {
   padding-top: 0;
 }
+
 .modal {
   .btn.btn-clear {
-    &:focus, &:hover {
+
+    &:focus,
+    &:hover {
       color: $primary-color;
       background: none;
     }
   }
 }
+
 #filter-modal {
   .modal-container {
     height: 90vh;
   }
+
   .modal-body {
     padding-top: 0;
     flex: 1;
   }
+
   .modal-footer {
     padding: 0.5rem;
   }
 }
+
 #filter-providers {
   list-style-type: none;
   margin-top: 0;
+
   input {
     margin-right: .5em;
   }
+
   label .fa-exclamation-triangle {
     margin-left: 1em;
     color: $warning-color-dark;
   }
 }
+
 #provider-select-all-wrapper {
   margin: 0.8rem 0 0 0.8rem;
   border-bottom: 1px solid $border-color;
   padding-bottom: .2rem;
   font-weight: bold;
 }
+
 .filters-active [data-target-modal="filter-modal"] {
   color: #FF9800 !important;
 }
+
 body:not(.persist-disabled) #persist-enable,
 body.persist-disabled #persist-disable {
   display: none;
 }
-#persist-enable { color: #F44336; }
+
+#persist-enable {
+  color: #F44336;
+}
+
 tr[data-parameter-key] td {
   position: relative;
 }
+
 .context-menu.menu {
   z-index: 9999;
   position: absolute;
   width: max-content;
   font-weight: normal;
-  .menu-item > a:focus, .menu-item > a:hover {
+
+  .menu-item>a:focus,
+  .menu-item>a:hover {
     color: #fff;
   }
 }
 
 /* Default colors, can be overridden in settings*/
-[data-request-type] { background-color: #f1ffdb; }
-[data-request-type="Page View"] { background-color: #dbedff; }
-details.request.redirected [data-request-type] { background-color: #eeeeee; }
-.request .table-hover tbody tr:hover > summary { background-color: #cccccc; }
+[data-request-type] {
+  background-color: #f1ffdb;
+}
+
+[data-request-type="Page View"] {
+  background-color: #dbedff;
+}
+
+details.request.redirected [data-request-type] {
+  background-color: #eeeeee;
+}
+
+.request .table-hover tbody tr:hover>summary {
+  background-color: #cccccc;
+}
 
 #toasts {
   position: fixed;
@@ -385,11 +464,11 @@ details.request.redirected [data-request-type] { background-color: #eeeeee; }
   right: 1.25rem;
   z-index: 300;
 }
+
 #toasts .toast {
   padding: .25rem .25rem .25rem .35rem;
   margin-top: .25rem;
 }
-
 
 span {
   &[title]::before {
@@ -405,15 +484,25 @@ span {
 body.dark {
   background-color: $dark-body-background-color;
   color: $dark-body-font-color;
+
   .empty {
     color: $dark-body-font-color;
   }
 
-
   /* Default colors, can be overridden in settings*/
-  [data-request-type] { background-color: #AED581; color: #333; }
-  [data-request-type="Page View"] { background-color: #90CAF9; }
-  details.request.redirected [data-request-type] { background-color: #333; color: #999; }
+  [data-request-type] {
+    background-color: #AED581;
+    color: #333;
+  }
+
+  [data-request-type="Page View"] {
+    background-color: #90CAF9;
+  }
+
+  details.request.redirected [data-request-type] {
+    background-color: #333;
+    color: #999;
+  }
 
   .table.table-striped tbody tr:nth-of-type(odd) {
     background-color: #2a2a2a;
@@ -421,62 +510,52 @@ body.dark {
 
   nav.navbar {
     background-color: $dark-body-background-alt-color;
-    border-bottom: 1px solid $dark-body-background-color;
+
     .navbar-section:last-of-type a.btn {
       border-left: 1px solid $dark-body-background-color;
     }
   }
 
-  .request:nth-of-type(odd) {
-    background-color: $dark-body-background-color;
-    &.request-error > summary {
-      background-color: $dark-warning-color-background;
-    }
-  }
-  .request:nth-of-type(even) {
-    background-color: darken($dark-body-background-color, 5%);
-    &.request-error > summary {
-      background-color: darken($dark-warning-color-background, 5%);
-    }
-  }
-  .request.request-error > summary {
+  .request.request-error>summary {
     color: $warning-color-background;
+    background-color: $dark-warning-color-background;
   }
 
-  .request:nth-of-type(odd):not([open]) {
-    animation: dark-request-highlight-odd 1.2s;
-  }
-  .request:nth-of-type(even):not([open]) {
-    animation: dark-request-highlight-even 1.2s;
-  }
   #requests .navigation {
     background-color: $dark-body-background-alt-color;
     border-top: darken($dark-body-background-color, 10%);
   }
+
   .request-details table {
     border-color: #111;
   }
+
   .request-details table td {
     border-bottom: 0;
   }
+
   .request .table-hover tbody tr:hover {
     background-color: #555;
     color: #ddd;
   }
-  .request tbody > tr > td:first-of-type {
-      border-right: 1px solid rgba(255, 255, 255, 0.1);
+
+  .request tbody>tr>td:first-of-type {
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
   }
 
-  .request-details > summary {
+  .request-details>summary {
     background-color: #3a3a3a;
     color: #2dd4c7;
     border-color: #111;
   }
-  .request[open] > summary {
+
+  .request[open]>summary {
     background-color: rgba(47, 132, 218, 0.75);
     color: #eee;
   }
-  .request[open], .request[open] > summary {
+
+  .request[open],
+  .request[open]>summary {
     border-color: #000;
   }
 
@@ -493,10 +572,13 @@ body.dark {
   .modal-container {
     background-color: $dark-body-background-alt-color;
   }
+
   .modal {
     .btn.btn-clear {
       color: #999;
-      &:focus, &:hover {
+
+      &:focus,
+      &:hover {
         color: $primary-color;
         background: none;
       }
@@ -512,13 +594,16 @@ body.dark {
   .form-input::placeholder {
     color: #666;
   }
+
   button.btn {
     background-color: $primary-color-dark;
     color: #ccc;
   }
+
   .filters-active [data-target-modal="filter-modal"] {
     color: #f27839 !important;
   }
+
   .modal-title {
     color: #2dd4c7;
   }
@@ -526,14 +611,19 @@ body.dark {
   .context-menu.menu {
     background-color: #111;
     color: #999;
+
     .divider {
       border-color: #333;
     }
-    .divider[data-content]::after, .divider-vert[data-content]::after {
+
+    .divider[data-content]::after,
+    .divider-vert[data-content]::after {
       background: #111;
       color: #999;
     }
-    .menu-item > a:focus, .menu-item > a:hover {
+
+    .menu-item>a:focus,
+    .menu-item>a:hover {
       background: rgba(47, 132, 218, 0.75);
       color: #ddd;
     }
@@ -543,18 +633,23 @@ body.dark {
     &.toast-primary {
       @include toast-variant($primary-color-dark);
     }
+
     &.toast-success {
       @include toast-variant($success-color-dark);
     }
+
     &.toast-warning {
       @include toast-variant($warning-color-dark);
     }
+
     &.toast-error {
       @include toast-variant($error-color-dark);
     }
+
     button.btn.btn-clear {
       background: none;
     }
+
     color: #ddd;
   }
 
@@ -563,11 +658,16 @@ body.dark {
     background-color: $dark-body-background-color;
     border: 1px solid #4b4b4b;
   }
+
   ::-webkit-scrollbar-track {
-    box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
     background-color: #333;
   }
+
   ::-webkit-scrollbar-thumb {
     background-color: darken($dark-body-background-color, 5%);
   }
+
+
+
 }

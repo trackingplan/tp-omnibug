@@ -74,7 +74,7 @@ class OmnibugSettings {
             showNotes: false,
 
             // Should newest or oldest entries show first?
-            requestSortOrder: "asc",
+            requestSortOrder: "desc",
 
             // Should params sort by field or label?
             paramSortOrder: "field",

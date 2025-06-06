@@ -1,4 +1,5 @@
-/* global OmnibugSettings, OmnibugProvider, OmnibugTracker, createElement, clearStyles, clearChildren, showToast, getAppropriateTextColor, Fuse */
+/* eslint-disable quotes */
+/* global OmnibugSettings, OmnibugProvider, OmnibugTracker, createElement, clearStyles, clearChildren, showToast, getAppropriateTextColor, Fuse, Trackingplan */
 
 /*
  * Omnibug
@@ -22,7 +23,10 @@ window.Omnibug = (() => {
         recordedData = [],
         allProviders = OmnibugProvider.getProviders(),
         tracker = new OmnibugTracker,
-        providerSearch;
+        providerSearch,
+        autoDetectedTpId = false,
+        userSetTpId = false, // Track if user has manually set the tpId
+        lastDetectionAttempt = 0;
 
 
     // Clear all requests
@@ -83,6 +87,47 @@ window.Omnibug = (() => {
         element.addEventListener("click", (event) => {
             tracker.track(["send", "event", "top nav", element.getAttribute("href").replace("#", "")]);
         });
+    });
+
+    // Trackingplan ID editor
+    d.getElementById("trackingplan-id-btn").addEventListener("click", (event) => {
+        event.preventDefault();
+        
+        let currentTpId = Trackingplan.options.tpId;
+        let promptText = currentTpId ? "Enter new Trackingplan ID (leave blank to return to auto-detection):" : "Enter your Trackingplan ID (leave blank for auto-detection):";
+        
+        if (autoDetectedTpId && !userSetTpId) {
+            promptText += "\n\nNote: This will override the auto-detected ID from the page.";
+        } else if (userSetTpId) {
+            promptText += "\n\nNote: You have manually set this ID. Leave blank to return to auto-detection.";
+        }
+        
+        let newTpId = prompt(promptText, currentTpId || "");
+        
+        if (newTpId !== null) { // User didn't cancel
+            if (newTpId.trim() === "") {
+                // User wants to return to auto-detection
+                userSetTpId = false;
+                autoDetectedTpId = false;
+                Trackingplan.options.tpId = null;
+                
+                // Try to immediately detect from current page
+                detectTrackingplanId();
+                
+                updateTrackingplanIdDisplay();
+                showToast("Returned to auto-detection mode", "info", 3);
+                tracker.track(["send", "event", "trackingplan", "returned-to-auto"]);
+            } else if (newTpId.trim() !== currentTpId) {
+                // User set a specific tpId
+                Trackingplan.options.tpId = newTpId.trim();
+                userSetTpId = true;
+                autoDetectedTpId = false;
+                
+                updateTrackingplanIdDisplay();
+                showToast("Trackingplan ID manually set to: " + newTpId.trim(), "success", 5);
+                tracker.track(["send", "event", "trackingplan", "manually-set"]);
+            }
+        }
     });
 
     d.addEventListener("contextmenu", function (e) {
@@ -516,6 +561,40 @@ window.Omnibug = (() => {
         filters.providers[key] = true;
     });
 
+    // Auto-detect Trackingplan ID from the page
+    function detectTrackingplanId() {
+        // Throttle detection attempts to avoid too many script injections
+        const now = Date.now();
+        const throttleDelay = 0; // No delay
+        
+        if (now - lastDetectionAttempt < throttleDelay) {
+            return; // Skip if we've attempted recently
+        }
+        
+        lastDetectionAttempt = now;
+        
+        // Send message to content script to check for Trackingplan on the page
+        window.Omnibug.send_message({
+            "type": "detectTrackingplan"
+        });
+    }
+
+    // Update Trackingplan ID display
+    function updateTrackingplanIdDisplay() {
+        let displayText = "";
+        if (Trackingplan.options.tpId) {
+            displayText = Trackingplan.options.tpId;
+            if (userSetTpId) {
+                displayText += " (manual)";
+            } else if (autoDetectedTpId) {
+                displayText += " (auto)";
+            }
+        } else {
+            displayText = "Click to connect to Trackingplan";
+        }
+        d.getElementById("trackingplan-id-display").innerText = displayText;
+    }
+
     // Load up the default settings
     loadSettings(settings);
 
@@ -555,7 +634,76 @@ window.Omnibug = (() => {
     function addRequest(request) {
         noRequests.classList.add("d-none");
         recordedData.push(request);
-        requestPanel.appendChild(buildRequest(request));
+        let requestRow = buildRequest(request);
+        validateRequest(request.request, requestRow);
+        console.log(settings);
+        
+        // Try to auto-detect Trackingplan ID if we don't have one yet
+        if (!Trackingplan.options.tpId) {
+            detectTrackingplanId();
+        }
+        
+        requestPanel.appendChild(requestRow);
+       
+
+    }
+
+    function validateRequest(request, row){
+        if(!Trackingplan.isTrackingplanRequest(request)){
+            row.getElementsByClassName("validation")[0].appendChild(getBadgeFromValidationResult(false));
+            return;
+        }
+
+        row.getElementsByClassName("validation")[0].innerText = ("Checking");
+    
+        Trackingplan.validateRequest(request).then((result) => {
+            row.getElementsByClassName("validation")[0].innerText = "";
+            row.getElementsByClassName("validation")[0].appendChild(getBadgeFromValidationResult(result));
+        });
+    }
+
+    function getBadgeFromValidationResult(result){
+        // badge is a rounded bullet that shows the status of the request
+        // it can say N/A with in gray text color, OK with green background, or WARN with yellow background
+        // we also set different data-tooltip attribute for each case
+
+        let badge = document.createElement("div");
+        badge.classList.add("tp-badge");
+        badge.classList.add("tooltip");
+        badge.classList.add("tooltip-left");
+        
+
+
+
+ 
+        if(result && Object.keys(result).length > 0){
+            badge.classList.add("tp-badge-warning");
+            badge.innerText = "WARN";
+            //for the data tooltip, we get the values of each item of the object and display new line starting with a bullet of the warning_message value of each one of the items of the object.
+            let tooltip = "";
+            Object.keys(result).forEach((key) => {
+                // replace html tags from the warning message
+                result[key].warning_message = result[key].warning_message.replace(/<[^>]*>?/gm, "").trim();
+                tooltip += "• " + result[key].warning_message + "\n";
+            });
+            badge.setAttribute("data-tooltip", tooltip);
+        } else {
+
+            if(result == false){
+                // its N/A
+                badge.classList.add("tp-badge-info");
+                badge.innerText = "N/A";
+                // we show a tooltip with the reason why it is N/A
+                badge.setAttribute("data-tooltip", "This request is not validated by Trackingplan");
+            } else {
+                // its OK
+                badge.classList.add("tp-badge-ok");
+                badge.innerText = "OK";
+                // we show a tooltip with the reason why it is OK
+                badge.setAttribute("data-tooltip", "This request is OK");
+            }
+        }
+        return badge;
     }
 
     /**
@@ -623,6 +771,7 @@ window.Omnibug = (() => {
      * @return {HTMLElement}
      */
     function buildRequest(request) {
+        console.log("REQUEST", request);
         let details = createElement("details", {
                 "classes": ["request"],
                 "attributes": {
@@ -669,9 +818,9 @@ window.Omnibug = (() => {
                 },
                 "children": [colTitleMultipleIcon]
             }),
-            colAccount = createElement("div", {
-                "classes": ["column", "col-3", "col-lg-4", "col-md-4", "col-sm-5"]
-            }),
+            colAccount = createElement("div", 
+                {"classes": ["column", "col-2", "col-lg-3", "col-md-3", "col-sm-3"]
+                }),
             requestTypeValue;
 
 
@@ -685,16 +834,24 @@ window.Omnibug = (() => {
             requestTypeValue = { "value": "Other" };
         }
 
+        // Check if requestTypeValue matches pattern "(N) x,y,z"
+        const match = requestTypeValue.value.match(/^\(\d+\)\s+(.+)$/);
+        if (match) {
+            // Extract the comma separated values and join with <br/>
+            let values = match[1].split(", ");
+            requestTypeValue.value = values.join("\n");
+        }
+
         let requestTypeEl = createElement("span", {
             "classes": ["label"],
             "attributes": {
                 "data-request-type": requestTypeValue.value,
             },
-            "text": requestTypeValue.value
+            "text": requestTypeValue.value 
         });
 
         let colTitleWrapper = createElement("div", {
-            "classes": ["column", "col-3", "col-lg-4", "col-md-4", "col-sm-5"],
+            "classes": ["column", "col-4", "col-lg-5", "col-md-5", "col-sm-6"],
             "children": [requestTypeEl, colTitleSpan, colTitleRedirect, colTitleMultiple],
             "attributes": {
                 "title": `${request.provider.name} ${requestTypeValue.value}`
@@ -731,19 +888,27 @@ window.Omnibug = (() => {
         }
 
         // Add the timestamp
-        let timestamp = new Date(request.request.timestamp).toLocaleString(),
+        let timestamp = new Date(request.request.timestamp).toLocaleTimeString('en-US', {hour12: false}).split(' ')[0],
             colTime = createElement("div", {
-                "classes": ["column", "col-3", "col-lg-4", "col-md-4", "col-sm-2"],
+                "classes": ["column", "col-1", "col-lg-2", "col-md-2", "col-sm-1"],
                 "text": timestamp,
                 "attributes": {
                     "title": timestamp
                 }
             });
+    
+    
+        let colValidation = createElement("div", {
+            "classes": ["column","col-2", "col-lg-2", "col-md-2", "col-sm-2", "validation"],
+            "text": "",
+            "attributes": {
+            }
+        });
 
         // Wrap everything
         let summaryColumns = createElement("div", {
                 "classes": ["columns"],
-                "children": [colTitleWrapper, colAccount, (includeEventCol ? colEvent : null), colTime]
+                "children": [colTitleWrapper, colAccount, (includeEventCol ? colEvent : null), colTime, colValidation]
             }),
             summaryContainer = createElement("div", {
                 "classes": ["container"],
@@ -776,17 +941,17 @@ window.Omnibug = (() => {
                     "title": "This request was not successful",
                 }),
                 pingHelpLink = createElement("a", {
-                "attributes": {
-                    "target": "_blank",
-                    "href": "https://omnibug.io/help/post-data-error?utm_source=omnibug&utm_medium=##BROWSER##&utm_campaign=post-data-warning"
-                },
-                "text": "Learn more."
-            }),
-            pingWarning = createElement("div", {
-                "classes": ["toast", "toast-error"],
-                "text": "There was an error capturing the POST data. Some data points sent with the request may be missing in Omnibug. ",
-                "children": [pingHelpLink]
-            });
+                    "attributes": {
+                        "target": "_blank",
+                        "href": "https://omnibug.io/help/post-data-error?utm_source=omnibug&utm_medium=##BROWSER##&utm_campaign=post-data-warning"
+                    },
+                    "text": "Learn more."
+                }),
+                pingWarning = createElement("div", {
+                    "classes": ["toast", "toast-error"],
+                    "text": "There was an error capturing the POST data. Some data points sent with the request may be missing in Omnibug. ",
+                    "children": [pingHelpLink]
+                });
             body.appendChild(pingWarning);
         }
 
@@ -1050,7 +1215,10 @@ window.Omnibug = (() => {
 
         // Reverse the direction of the entries to show newest first
         if (settings.requestSortOrder === "desc") {
-            styleSheet.sheet.insertRule(`#requests {display: flex; flex-direction: column-reverse;}`, styleSheet.sheet.cssRules.length);
+            document.getElementById("requests").classList.add("reversed");
+            styleSheet.sheet.insertRule(`#requests.reversed {display: flex; flex-direction: column-reverse;}`, styleSheet.sheet.cssRules.length);
+        } else {
+            document.getElementById("requests").classList.remove("reversed");
         }
 
         // Wrap text or truncate with ellipsis
@@ -1112,8 +1280,16 @@ window.Omnibug = (() => {
             styleSheet.sheet.insertRule(`.label + span::before {content: "";}`);
         }
 
+        // Update Trackingplan ID display
+        updateTrackingplanIdDisplay();
+
         if (fromStorage) {
             storageLoadedSettings = true;
+        }
+
+        // Try to auto-detect Trackingplan ID from the page on first load
+        if (fromStorage && !Trackingplan.options.tpId) {
+            detectTrackingplanId();
         }
     }
 
@@ -1246,6 +1422,42 @@ window.Omnibug = (() => {
                 case "settings":
                     loadSettings(message.data, true);
                     break;
+                case "trackingplanDetected": {
+                    // Only update if user hasn't manually set a tpId
+                    if (!userSetTpId) {
+                        const previousTpId = Trackingplan.options.tpId;
+                        const newTpId = message.tpId;
+                        
+                        if (newTpId !== previousTpId) {
+                            Trackingplan.options.tpId = newTpId;
+                            
+                            if (newTpId) {
+                                // New tpId detected
+                                if (previousTpId) {
+                                    // tpId changed
+                                    autoDetectedTpId = true;
+                                    updateTrackingplanIdDisplay();
+                                    showToast(`Trackingplan ID updated: ${newTpId}`, "info", 5);
+                                    tracker.track(["send", "event", "trackingplan", "updated"]);
+                                } else {
+                                    // First time detection
+                                    autoDetectedTpId = true;
+                                    updateTrackingplanIdDisplay();
+                                    showToast("Auto-detected Trackingplan ID: " + newTpId, "success", 5);
+                                    tracker.track(["send", "event", "trackingplan", "auto-detected"]);
+                                }
+                            } else if (previousTpId) {
+                                // tpId was cleared (new page without Trackingplan)
+                                autoDetectedTpId = false;
+                                updateTrackingplanIdDisplay();
+                                showToast("Trackingplan no longer detected", "info", 3);
+                                tracker.track(["send", "event", "trackingplan", "cleared"]);
+                            }
+                        }
+                    }
+                    // If userSetTpId is true, we ignore auto-detection results
+                    break;
+                }
                 default:
                     this.send_message("Unknown message type", message);
                     break;
