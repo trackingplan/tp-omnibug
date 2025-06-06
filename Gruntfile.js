@@ -9,8 +9,8 @@ module.exports = function (grunt) {
                 "name": "Trackingplan Omnibug",
                 "version": "1.0.0",
                 "storageKey": "trackingplan-omnibug",
-                "feedbackUrl": "https://github.com/MisterPhilip/omnibug/issues",
-                "analyticsID": "UA-114343677-2"
+                "feedbackUrl": "https://github.com/trackingplan/tp-omnibug/issues",
+                "analyticsID": "-"
             }
         },
         "chrome": {
